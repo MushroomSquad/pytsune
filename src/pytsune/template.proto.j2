@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package {{ proto_define.package }};
+
+{% for service in proto_define.services %}
+service {{ service.name }} {
+    {% for method in service.methods -%}
+    rpc {{ method.name }}({{ method.request }}) returns ({{ method.response }});
+    {%- if not loop.last %}
+    {% endif %}
+    {%- endfor %}
+}
+{% endfor %}
+{% for enum in proto_define.enums.values() %}
+enum {{ enum.name }} {
+    {% for field in enum.fields -%}
+    {{ field.name }} = {{ field.index }};
+    {%- if not loop.last %}
+    {% endif %}
+    {%- endfor %}
+}
+{% endfor %}
+{% for message in proto_define.messages.values() %}
+message {{ message.name }} {
+    {% for field in message.fields -%}
+    {{ field.type }} {{ field.name }} = {{ field.index }};
+    {%- if not loop.last %}
+    {% endif %}
+    {%- endfor %}
+}
+{% endfor %}
+
