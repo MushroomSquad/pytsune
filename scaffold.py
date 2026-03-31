@@ -115,7 +115,7 @@ def build_dependencies(project_type: str, db: str, extra_libs: list[str]) -> lis
         "cli": ["typer", "pydantic-settings"],
         "web": ["fastapi", "uvicorn", "pydantic-settings"],
         "telegram": ["aiogram", "pydantic-settings"],
-        "airflow": ["apache-airflow", "pydantic-settings"],
+        "airflow": ["apache-airflow>=2.3", "pydantic-settings"],
         "lib": ["pydantic-settings"],
     }
     database_dependencies = {

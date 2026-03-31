@@ -15,6 +15,8 @@ class ContainerIntegrationTestCase(unittest.TestCase):
             created = facade.create_item("demo", 12.5)
             fetched = facade.get_item(created.id)
             listed = facade.list_items()
+            produced = facade.produce(source_id="demo-source")
+            consumed = facade.consume(item=produced[0])
         finally:
             if previous is None:
                 os.environ.pop("TEMPLATE_REPOSITORY_TYPE", None)
@@ -24,3 +26,5 @@ class ContainerIntegrationTestCase(unittest.TestCase):
         self.assertEqual(fetched.id, created.id)
         self.assertEqual(len(listed), 1)
         self.assertEqual(listed[0].name, "demo")
+        self.assertEqual(produced[0]["source_id"], "demo-source")
+        self.assertEqual(consumed["status"], "processed")

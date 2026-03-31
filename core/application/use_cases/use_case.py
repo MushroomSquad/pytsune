@@ -34,3 +34,19 @@ class ListItemsUseCase:
 
     def execute(self) -> list[Item]:
         return self._repository.list()
+
+
+def list_items(*, source_id: str) -> list[dict[str, object]]:
+    return [
+        {
+            "item_id": f"{source_id}-item-1",
+            "source_id": source_id,
+        }
+    ]
+
+
+def process_item(item: dict[str, object]) -> dict[str, object]:
+    return {
+        "status": "processed",
+        "item": item,
+    }

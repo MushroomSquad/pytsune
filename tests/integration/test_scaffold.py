@@ -46,12 +46,18 @@ def test_scaffold_main_local_template(project_type: str, tmp_path: Path) -> None
     assert (package_root / "infrastructure").exists()
     assert (package_root / main_subtree).exists()
     assert (package_root / adapter_subtree).exists()
+    if project_type == "airflow":
+        assert (package_root / "app/adapters/input/airflow/__init__.py").exists()
+        assert (package_root / "app/adapters/input/airflow/operators.py").exists()
+        assert (package_root / "app/airflow/dag.py").exists()
     pyproject = tomllib.loads((tmp_path / project_name / "pyproject.toml").read_text(encoding="utf-8"))
     if project_type == "cli":
         assert (package_root / "app/adapters/input/cli/args.py").exists()
         assert pyproject["project"]["scripts"][project_name] == (
             f"{project_name}.app.adapters.input.cli:app"
         )
+    if project_type == "airflow":
+        assert "apache-airflow>=2.3" in pyproject["project"]["dependencies"]
     assert (tmp_path / project_name / "main.py").exists()
 
     commands = [call.args[0] for call in run_mock.call_args_list]

@@ -1,17 +1,15 @@
 ## Summary
 
-- replace the monolithic CLI adapter with a Typer package under `app/adapters/input/cli/` that exposes shared option aliases, auto-discovers command groups, and injects `AppFacade` through `ctx.obj`
-- add autodiscovered `items` and `smoke` command groups, keep `app/cli/*` as compatibility redirects, and route `__main__.py` plus the console script entry point to the new CLI app
-- update `scaffold.py`, docs, and tests so generated CLI projects emit `args.py`, `commands/`, and a console script targeting `app.adapters.input.cli:app`
+- add a producer-consumer Airflow adapter skeleton with `ProducerOperator` and `ConsumerOperator`, plus facade/use-case stubs for `produce()` and `consume()`
+- rewrite the Airflow DAG entry point to a two-group topology using `ProducerOperator`, `ConsumerOperator.partial(...).expand(...)`, and optional import fallbacks so the module still parses without Airflow installed
+- update scaffold generation and scaffold tests so `airflow` projects emit `app/adapters/input/airflow/__init__.py`, `operators.py`, the rewritten `app/airflow/dag.py`, and the Airflow test package
 
 ## Verification
 
-- `python - <<'PY' ... _write_pyproject(..., 'cli', ...) ... PY`
-  - confirmed generated CLI `pyproject.toml` contains `demo_project.app.adapters.input.cli:app`
-- `python -m py_compile scaffold.py __main__.py app/adapters/input/cli/args.py app/adapters/input/cli/cli.py app/adapters/input/cli/commands/items.py app/adapters/input/cli/commands/smoke.py tests/unit/test_cli_args.py tests/unit/test_cli_autodiscover.py tests/integration/test_cli.py tests/unit/test_scaffold.py tests/integration/test_scaffold.py`
+- `python -m py_compile app/facade.py core/application/use_cases/use_case.py app/adapters/input/airflow/__init__.py app/adapters/input/airflow/operators.py app/airflow/dag.py scaffold.py tests/airflow/test_operators.py tests/integration/test_container.py tests/unit/test_scaffold.py tests/integration/test_scaffold.py`
 
 ## Environment Limits
 
-- `pytest` is not installed in this sandbox, so the new CLI tests and the existing suite could not be executed
-- `typer` is not installed in this sandbox, so `python -m pytsune --help` and `CliRunner`-based runtime checks could not be executed here
-- `scripts/ai-check.sh` could not be run because `scripts/ai-check.sh` does not exist in this repository
+- `uv run pytest tests/airflow/ tests/integration/test_container.py tests/unit/test_scaffold.py tests/integration/test_scaffold.py` could not complete because this sandbox has no network access and no preinstalled `pytest`
+- `uv run ruff check` and `uv run mypy` could not complete for the same reason; the sandbox also lacks `ruff`, `mypy`, and `pydantic-settings`
+- `airflow dags test producer_consumer_skeleton <date>` could not be executed because Airflow is not installed in this sandbox

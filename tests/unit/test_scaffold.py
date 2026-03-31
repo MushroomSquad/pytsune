@@ -40,7 +40,7 @@ def test_build_dependencies_telegram_postgresql() -> None:
 def test_build_dependencies_airflow_none() -> None:
     result = build_dependencies("airflow", "none", [])
 
-    assert "apache-airflow" in result
+    assert "apache-airflow>=2.3" in result
     assert "pydantic-settings" in result
     assert "asyncpg" not in result
     assert "aiosqlite" not in result
@@ -80,7 +80,7 @@ def test_should_include_lib() -> None:
         ("cli", "app/adapters/input/cli/cli.py", "app/adapters/input/rest/controller.py"),
         ("web", "app/adapters/input/rest/controller.py", "app/adapters/input/cli/cli.py"),
         ("telegram", "app/adapters/input/telegram/adapter.py", "app/adapters/input/lib/client.py"),
-        ("airflow", "app/adapters/input/airflow/operator.py", "app/adapters/input/telegram/adapter.py"),
+        ("airflow", "app/adapters/input/airflow/operators.py", "app/adapters/input/telegram/adapter.py"),
         ("lib", "app/adapters/input/lib/client.py", "app/adapters/input/rest/controller.py"),
     ],
 )
@@ -152,6 +152,34 @@ def test_name_substitution(tmp_path: Path) -> None:
     ).read_text(encoding="utf-8")
 
 
+def test_copy_template_includes_airflow_operator_package(tmp_path: Path) -> None:
+    src_root = tmp_path / "src"
+    dst_root = tmp_path / "dst"
+    (src_root / "app/airflow").mkdir(parents=True)
+    (src_root / "app/adapters/input/airflow").mkdir(parents=True)
+    (src_root / "core/domain").mkdir(parents=True)
+    (src_root / "infrastructure").mkdir(parents=True)
+    (src_root / "tests/airflow").mkdir(parents=True)
+    (src_root / "README.md").write_text("template", encoding="utf-8")
+    (src_root / "__init__.py").write_text("", encoding="utf-8")
+    (src_root / "__main__.py").write_text("from template.app.airflow.dag import run", encoding="utf-8")
+    (src_root / "app/__init__.py").write_text("", encoding="utf-8")
+    (src_root / "app/facade.py").write_text("template", encoding="utf-8")
+    (src_root / "app/adapters/__init__.py").write_text("", encoding="utf-8")
+    (src_root / "app/adapters/input/__init__.py").write_text("", encoding="utf-8")
+    (src_root / "app/airflow/dag.py").write_text("template", encoding="utf-8")
+    (src_root / "app/adapters/input/airflow/__init__.py").write_text("", encoding="utf-8")
+    (src_root / "app/adapters/input/airflow/operators.py").write_text("template", encoding="utf-8")
+    (src_root / "tests/airflow/__init__.py").write_text("", encoding="utf-8")
+
+    _copy_template(src_root, dst_root, "demo_project", "airflow")
+
+    assert (dst_root / "demo_project/app/airflow/dag.py").exists()
+    assert (dst_root / "demo_project/app/adapters/input/airflow/__init__.py").exists()
+    assert (dst_root / "demo_project/app/adapters/input/airflow/operators.py").exists()
+    assert (dst_root / "tests/airflow/__init__.py").exists()
+
+
 def test_write_pyproject_lib_none(tmp_path: Path) -> None:
     deps = _write_pyproject(tmp_path, "demo_project", "lib", "none", [])
     pyproject = tomllib.loads((tmp_path / "pyproject.toml").read_text(encoding="utf-8"))
@@ -179,6 +207,13 @@ def test_write_pyproject_cli_adds_console_script(tmp_path: Path) -> None:
     pyproject = tomllib.loads((tmp_path / "pyproject.toml").read_text(encoding="utf-8"))
 
     assert pyproject["project"]["scripts"]["demo_project"] == "demo_project.app.adapters.input.cli:app"
+
+
+def test_write_pyproject_airflow_uses_versioned_dependency(tmp_path: Path) -> None:
+    _write_pyproject(tmp_path, "demo_project", "airflow", "none", [])
+    pyproject = tomllib.loads((tmp_path / "pyproject.toml").read_text(encoding="utf-8"))
+
+    assert "apache-airflow>=2.3" in pyproject["project"]["dependencies"]
 
 
 def test_download_template_extracts_top_level_dir(tmp_path: Path) -> None:

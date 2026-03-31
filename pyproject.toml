@@ -18,6 +18,10 @@ pytsune = "app.adapters.input.cli:app"
 dev = [
     "pytest",
 ]
+airflow = [
+    "apache-airflow>=2.3",
+    "pydantic-settings",
+]
 
 [tool.ruff]
 line-length = 100
