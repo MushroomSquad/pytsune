@@ -1,21 +1,31 @@
 from __future__ import annotations
 
 import io
-import shutil
+import tarfile
+import tomllib
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 
 from scaffold import (
+    _copy_template,
+    _download_template,
+    _should_include,
     _tty_input,
-    add_dependencies,
+    _write_pyproject,
     ask,
     build_dependencies,
     main,
-    scaffold_project,
     validate_project_name,
 )
+
+
+@pytest.fixture(autouse=True)
+def _mock_urlretrieve() -> None:
+    with patch("scaffold.urllib.request.urlretrieve") as urlretrieve_mock:
+        urlretrieve_mock.side_effect = AssertionError("unexpected network call")
+        yield
 
 
 def test_build_dependencies_telegram_postgresql() -> None:
@@ -57,6 +67,130 @@ def test_build_dependencies_lib_mongodb() -> None:
     assert "uvicorn" not in result
     assert "aiogram" not in result
     assert "apache-airflow" not in result
+
+
+def test_should_include_lib() -> None:
+    assert _should_include("app/lib/main.py", "lib") is True
+    assert _should_include("app/cli/main.py", "lib") is False
+
+
+@pytest.mark.parametrize(
+    ("project_type", "included", "excluded"),
+    [
+        ("cli", "app/adapters/input/cli/cli.py", "app/adapters/input/rest/controller.py"),
+        ("web", "app/adapters/input/rest/controller.py", "app/adapters/input/cli/cli.py"),
+        ("telegram", "app/adapters/input/telegram/adapter.py", "app/adapters/input/lib/client.py"),
+        ("airflow", "app/adapters/input/airflow/operator.py", "app/adapters/input/telegram/adapter.py"),
+        ("lib", "app/adapters/input/lib/client.py", "app/adapters/input/rest/controller.py"),
+    ],
+)
+def test_should_include_cli(project_type: str, included: str, excluded: str) -> None:
+    assert _should_include(included, project_type) is True
+    assert _should_include(excluded, project_type) is False
+
+
+def test_copy_template_creates_structure(tmp_path: Path) -> None:
+    src_root = tmp_path / "src"
+    dst_root = tmp_path / "dst"
+    (src_root / "app/lib").mkdir(parents=True)
+    (src_root / "app/adapters/input/lib").mkdir(parents=True)
+    (src_root / "app/adapters/input/cli").mkdir(parents=True)
+    (src_root / "core/domain").mkdir(parents=True)
+    (src_root / "infrastructure/config").mkdir(parents=True)
+    (src_root / "tests/unit").mkdir(parents=True)
+    (src_root / "README.md").write_text("template for pytsune", encoding="utf-8")
+    (src_root / "__init__.py").write_text('"""template"""', encoding="utf-8")
+    (src_root / "__main__.py").write_text("from template.app.lib.main import run", encoding="utf-8")
+    (src_root / "app/__init__.py").write_text("", encoding="utf-8")
+    (src_root / "app/facade.py").write_text("import template", encoding="utf-8")
+    (src_root / "app/lib/main.py").write_text("from template import app", encoding="utf-8")
+    (src_root / "app/adapters/__init__.py").write_text("", encoding="utf-8")
+    (src_root / "app/adapters/input/__init__.py").write_text("", encoding="utf-8")
+    (src_root / "app/adapters/input/lib/client.py").write_text("template", encoding="utf-8")
+    (src_root / "app/adapters/input/cli/cli.py").write_text("cli", encoding="utf-8")
+    (src_root / "core/domain/model.py").write_text("template", encoding="utf-8")
+    (src_root / "infrastructure/config/settings.py").write_text("TEMPLATE", encoding="utf-8")
+    (src_root / "tests/unit/test_example.py").write_text("template", encoding="utf-8")
+
+    _copy_template(src_root, dst_root, "demo_project", "lib")
+
+    assert (dst_root / "demo_project/core/domain/model.py").exists()
+    assert (dst_root / "demo_project/infrastructure/config/settings.py").exists()
+    assert (dst_root / "demo_project/app/lib/main.py").exists()
+    assert (dst_root / "demo_project/app/adapters/input/lib/client.py").exists()
+    assert not (dst_root / "demo_project/app/adapters/input/cli/cli.py").exists()
+    assert (dst_root / "main.py").exists()
+
+
+def test_name_substitution(tmp_path: Path) -> None:
+    src_root = tmp_path / "src"
+    dst_root = tmp_path / "dst"
+    (src_root / "app/lib").mkdir(parents=True)
+    (src_root / "core/domain").mkdir(parents=True)
+    (src_root / "infrastructure").mkdir(parents=True)
+    (src_root / "README.md").write_text("pytsune template TEMPLATE", encoding="utf-8")
+    (src_root / "__init__.py").write_text("", encoding="utf-8")
+    (src_root / "__main__.py").write_text("from template.app.lib.main import run", encoding="utf-8")
+    (src_root / "app/__init__.py").write_text("", encoding="utf-8")
+    (src_root / "app/facade.py").write_text("template pytsune", encoding="utf-8")
+    (src_root / "app/lib/main.py").write_text("template pytsune", encoding="utf-8")
+    (src_root / "app/adapters").mkdir(parents=True)
+    (src_root / "app/adapters/__init__.py").write_text("", encoding="utf-8")
+    (src_root / "app/adapters/input").mkdir(parents=True)
+    (src_root / "app/adapters/input/__init__.py").write_text("", encoding="utf-8")
+    (src_root / "core/domain/model.toml").write_text('name = "pytsune"\nmodule = "template"', encoding="utf-8")
+
+    _copy_template(src_root, dst_root, "demo_project", "lib")
+
+    assert "pytsune" not in (dst_root / "README.md").read_text(encoding="utf-8")
+    assert "template" not in (dst_root / "demo_project/app/lib/main.py").read_text(encoding="utf-8")
+    assert "pytsune" not in (
+        dst_root / "demo_project/core/domain/model.toml"
+    ).read_text(encoding="utf-8")
+
+
+def test_write_pyproject_lib_none(tmp_path: Path) -> None:
+    deps = _write_pyproject(tmp_path, "demo_project", "lib", "none", [])
+    pyproject = tomllib.loads((tmp_path / "pyproject.toml").read_text(encoding="utf-8"))
+
+    assert deps == ["pydantic-settings"]
+    assert "pydantic-settings" in pyproject["project"]["dependencies"]
+    assert "fastapi" not in pyproject["project"]["dependencies"]
+    assert "scripts" not in pyproject.get("project", {})
+
+
+def test_write_pyproject_web_postgresql(tmp_path: Path) -> None:
+    _write_pyproject(tmp_path, "demo_project", "web", "postgresql", ["httpx"])
+    pyproject = tomllib.loads((tmp_path / "pyproject.toml").read_text(encoding="utf-8"))
+
+    dependencies = pyproject["project"]["dependencies"]
+    assert "fastapi" in dependencies
+    assert "uvicorn" in dependencies
+    assert "asyncpg" in dependencies
+    assert "sqlalchemy[asyncio]" in dependencies
+    assert "httpx" in dependencies
+
+
+def test_download_template_extracts_top_level_dir(tmp_path: Path) -> None:
+    archive_path = tmp_path / "archive.tar.gz"
+    extracted = tmp_path / "template-main"
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    extracted.mkdir()
+    (extracted / "README.md").write_text("hello", encoding="utf-8")
+    with tarfile.open(archive_path, "w:gz") as archive:
+        archive.add(extracted, arcname="template-main")
+    shutil_src = archive_path
+
+    def fake_urlretrieve(url: str, destination: Path) -> tuple[str, object]:
+        Path(destination).write_bytes(shutil_src.read_bytes())
+        return str(destination), object()
+
+    with patch("scaffold.urllib.request.urlretrieve", side_effect=fake_urlretrieve):
+        result = _download_template(work_dir)
+
+    assert result.name == "template-main"
+    assert (result / "README.md").exists()
 
 
 def test_ask_valid_choice() -> None:
@@ -123,48 +257,3 @@ def test_validate_project_name_rejects_invalid() -> None:
     assert validate_project_name("MyProject") is False
     assert validate_project_name("my-project") is False
     assert validate_project_name("123foo") is False
-
-
-@patch("scaffold.subprocess.run")
-def test_scaffold_project_calls_uv_init(run_mock: Mock, tmp_path: Path) -> None:
-    name = "demo_project"
-    target_dir = tmp_path / name
-
-    scaffold_project(name, "web", target_dir)
-
-    run_mock.assert_called_once_with(
-        ["uv", "init", "--name", name, "--python", "3.11", str(target_dir)],
-        check=True,
-    )
-
-
-@patch("scaffold.subprocess.run")
-def test_scaffold_project_aborts_if_dir_exists(run_mock: Mock, tmp_path: Path) -> None:
-    target_dir = tmp_path / "demo_project"
-    target_dir.mkdir()
-
-    with pytest.raises(FileExistsError):
-        scaffold_project("demo_project", "web", target_dir)
-
-    run_mock.assert_not_called()
-
-
-@patch("scaffold.subprocess.run")
-def test_add_dependencies_calls_uv_add(run_mock: Mock, tmp_path: Path) -> None:
-    deps = ["fastapi", "uvicorn"]
-
-    add_dependencies(tmp_path, deps)
-
-    run_mock.assert_called_once_with(["uv", "add", *deps], cwd=tmp_path, check=True)
-
-
-@pytest.mark.skipif(shutil.which("uv") is None, reason="uv is unavailable")
-def test_scaffold_project_integration(tmp_path: Path) -> None:
-    name = "demo_project"
-    target_dir = tmp_path / name
-
-    scaffold_project(name, "cli", target_dir)
-
-    pyproject = target_dir / "pyproject.toml"
-    assert pyproject.exists()
-    assert name in pyproject.read_text(encoding="utf-8")
