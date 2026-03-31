@@ -9,7 +9,7 @@
 Run through the installer:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/OWNER/REPO/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/MushroomSquad/pytsune/main/install.sh | bash
 ```
 
 The `install.sh` script:
