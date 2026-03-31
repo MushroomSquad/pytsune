@@ -1,5 +1,9 @@
 # Universal DDD + Hexagonal Architecture Project Template
 
+<div align="center">
+  <img src="./logo.png" alt="Logo" width="364">
+</div>
+
 ## Quick Start
 
 Run through the installer:
