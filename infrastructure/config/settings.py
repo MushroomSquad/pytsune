@@ -13,6 +13,7 @@ except ImportError:  # pragma: no cover - optional dependency
 
 if BaseSettings is not None:
     class Settings(BaseSettings):
+        environment: str = "development"
         repository_type: str = "memory"
         items_file_path: str = "template/items.json"
         web_host: str = "127.0.0.1"
@@ -31,6 +32,7 @@ if BaseSettings is not None:
 else:
     @dataclass(slots=True)
     class Settings:
+        environment: str = field(default_factory=lambda: os.getenv("TEMPLATE_ENVIRONMENT", "development"))
         repository_type: str = field(default_factory=lambda: os.getenv("TEMPLATE_REPOSITORY_TYPE", "memory"))
         items_file_path: str = field(default_factory=lambda: os.getenv("TEMPLATE_ITEMS_FILE_PATH", "template/items.json"))
         web_host: str = field(default_factory=lambda: os.getenv("TEMPLATE_WEB_HOST", "127.0.0.1"))

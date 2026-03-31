@@ -77,7 +77,10 @@ cd <name> && uv run main.py
 │   ├── adapters
 │   │   ├── input
 │   │   │   ├── airflow/operator.py
+│   │   │   ├── cli/args.py
 │   │   │   ├── cli/cli.py
+│   │   │   ├── cli/commands/items.py
+│   │   │   ├── cli/commands/smoke.py
 │   │   │   ├── lib/client.py
 │   │   │   ├── rest/controller.py
 │   │   │   └── telegram/adapter.py
@@ -148,6 +151,15 @@ cd <name> && uv run main.py
 - Input adapters live in `app/adapters/input/` and translate CLI arguments, REST payloads, Telegram messages, Airflow task context, and library calls into application-layer requests.
 - `app/facade.py` is the thin boundary object consumed by runners in `app/<type>/main.py`.
 
+### CLI Audit And Autodiscovery
+
+- Legacy `app/cli/main.py` only routed three item operations: `create`, `get`, and `list`.
+- The old CLI surface had no reusable shared options.
+- `app/cli/main.py` imported `template.infrastructure.startup.bootstrap` directly, so the entry point bypassed the adapter boundary for composition, but it did not import any DB module directly.
+- The new root CLI lives in `app/adapters/input/cli/cli.py` and wires `Settings -> ContainerFactory -> AppFacade` inside `@app.callback()`, storing the facade in `ctx.obj`.
+- Command groups live in `app/adapters/input/cli/commands/`. Any module in that package that exposes `app = typer.Typer(...)` is auto-registered.
+- To add a new group, create a new file under `commands/`, expose a Typer app, and keep commands thin by delegating through the injected `AppFacade`.
+
 ### Infrastructure Responsibilities
 
 - `infrastructure/config/settings.py` provides environment-driven configuration with a `pydantic-settings` fallback path.
@@ -173,13 +185,15 @@ version = "0.1.0"
 description = "Hexagonal architecture template with CLI, web, GUI, and Airflow entry points."
 requires-python = ">=3.11"
 dependencies = [
+    "pydantic-settings",
+    "typer",
 ]
 
 [tool.uv]
 managed = true
 
 [project.scripts]
-pytsune = "scaffold:main"
+pytsune = "app.adapters.input.cli:app"
 
 [dependency-groups]
 dev = [

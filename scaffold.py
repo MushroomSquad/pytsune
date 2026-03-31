@@ -74,7 +74,7 @@ SKIP_NAMES = {
 }
 ROOT_PACKAGE_PATHS = ("__init__.py", "__main__.py", "app/", "core/", "infrastructure/")
 ENTRY_MODULES = {
-    "cli": "app.cli.main",
+    "cli": "app.adapters.input.cli.cli",
     "web": "app.web.main",
     "telegram": "app.telegram.main",
     "airflow": "app.airflow.dag",
@@ -266,6 +266,15 @@ def _write_pyproject(
 ) -> list[str]:
     dependencies = build_dependencies(project_type, db, extra_libs)
     dependency_block = "".join(f'    "{dependency}",\n' for dependency in dependencies)
+    scripts_block = ""
+    if project_type == "cli":
+        scripts_block = textwrap.dedent(
+            f"""
+
+            [project.scripts]
+            {project_name} = "{project_name}.app.adapters.input.cli:app"
+            """
+        ).rstrip()
     content = textwrap.dedent(
         f"""
         [project]
@@ -274,6 +283,7 @@ def _write_pyproject(
         requires-python = ">=3.11"
         dependencies = [
         {dependency_block}]
+        {scripts_block}
 
         [tool.uv]
         managed = true

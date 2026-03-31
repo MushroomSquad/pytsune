@@ -94,7 +94,7 @@ def test_copy_template_creates_structure(tmp_path: Path) -> None:
     dst_root = tmp_path / "dst"
     (src_root / "app/lib").mkdir(parents=True)
     (src_root / "app/adapters/input/lib").mkdir(parents=True)
-    (src_root / "app/adapters/input/cli").mkdir(parents=True)
+    (src_root / "app/adapters/input/cli/commands").mkdir(parents=True)
     (src_root / "core/domain").mkdir(parents=True)
     (src_root / "infrastructure/config").mkdir(parents=True)
     (src_root / "tests/unit").mkdir(parents=True)
@@ -108,6 +108,8 @@ def test_copy_template_creates_structure(tmp_path: Path) -> None:
     (src_root / "app/adapters/input/__init__.py").write_text("", encoding="utf-8")
     (src_root / "app/adapters/input/lib/client.py").write_text("template", encoding="utf-8")
     (src_root / "app/adapters/input/cli/cli.py").write_text("cli", encoding="utf-8")
+    (src_root / "app/adapters/input/cli/args.py").write_text("args", encoding="utf-8")
+    (src_root / "app/adapters/input/cli/commands/items.py").write_text("items", encoding="utf-8")
     (src_root / "core/domain/model.py").write_text("template", encoding="utf-8")
     (src_root / "infrastructure/config/settings.py").write_text("TEMPLATE", encoding="utf-8")
     (src_root / "tests/unit/test_example.py").write_text("template", encoding="utf-8")
@@ -119,6 +121,7 @@ def test_copy_template_creates_structure(tmp_path: Path) -> None:
     assert (dst_root / "demo_project/app/lib/main.py").exists()
     assert (dst_root / "demo_project/app/adapters/input/lib/client.py").exists()
     assert not (dst_root / "demo_project/app/adapters/input/cli/cli.py").exists()
+    assert not (dst_root / "demo_project/app/adapters/input/cli/commands/items.py").exists()
     assert (dst_root / "main.py").exists()
 
 
@@ -169,6 +172,13 @@ def test_write_pyproject_web_postgresql(tmp_path: Path) -> None:
     assert "asyncpg" in dependencies
     assert "sqlalchemy[asyncio]" in dependencies
     assert "httpx" in dependencies
+
+
+def test_write_pyproject_cli_adds_console_script(tmp_path: Path) -> None:
+    _write_pyproject(tmp_path, "demo_project", "cli", "none", [])
+    pyproject = tomllib.loads((tmp_path / "pyproject.toml").read_text(encoding="utf-8"))
+
+    assert pyproject["project"]["scripts"]["demo_project"] == "demo_project.app.adapters.input.cli:app"
 
 
 def test_download_template_extracts_top_level_dir(tmp_path: Path) -> None:

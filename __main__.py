@@ -5,15 +5,18 @@ import sys
 
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
-    if not args:
-        print("Usage: python -m template [cli|web|gui|airflow|lib|telegram] ...")
-        return 1
+    if not args or args[0].startswith("-"):
+        from template.app.adapters.input.cli import app as cli_app
+
+        cli_app(args=args, prog_name="python -m template")
+        return 0
 
     command = args.pop(0)
     if command == "cli":
-        from template.app.cli.main import run as run_cli
+        from template.app.adapters.input.cli import app as cli_app
 
-        return run_cli(args)
+        cli_app(args=args, prog_name="python -m template cli")
+        return 0
     if command == "web":
         from template.app.web.main import run as run_web
 
@@ -35,8 +38,10 @@ def main(argv: list[str] | None = None) -> int:
 
         return run_telegram(args)
 
-    print(f"Unknown command: {command}")
-    return 1
+    from template.app.adapters.input.cli import app as cli_app
+
+    cli_app(args=[command, *args], prog_name="python -m template")
+    return 0
 
 
 if __name__ == "__main__":

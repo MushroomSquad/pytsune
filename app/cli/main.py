@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-from template.app.adapters.input.cli.cli import CliAdapter
-from template.infrastructure.startup import bootstrap
+from template.app.adapters.input.cli.cli import run as run_cli
 
 
 def run(argv: list[str] | None = None) -> int:
-    facade = bootstrap()
-    adapter = CliAdapter(facade)
-    return adapter.run(argv)
+    return run_cli(argv)

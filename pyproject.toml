@@ -4,13 +4,15 @@ version = "0.1.0"
 description = "Hexagonal architecture template with CLI, web, GUI, and Airflow entry points."
 requires-python = ">=3.11"
 dependencies = [
+    "pydantic-settings",
+    "typer",
 ]
 
 [tool.uv]
 managed = true
 
 [project.scripts]
-pytsune = "scaffold:main"
+pytsune = "app.adapters.input.cli:app"
 
 [dependency-groups]
 dev = [
