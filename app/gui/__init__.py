@@ -1,0 +1,1 @@
+"""GUI application entry point."""

@@ -1,0 +1,27 @@
+##[pylyzer] failed /mnt/Soft/Work/Projects/Python_Projects/template/template/scaffold.py 1774612151 3554
+.___v_desugar_1: Never
+.annotations: Never
+.___v_desugar_2: Never
+.Path: Never
+.re: Never
+
+.shutil: Never
+
+.subprocess: Never
+
+.sys: Never
+
+.textwrap: Never
+
+.PROJECT_TYPES: {Type_v_global_605: global::Tuple([Str, Str, Str, Str, Str]) | Type_v_global_605 == ("cli", "web", "telegram", "airflow", "lib")}
+.DATABASE_CHOICES: {Type_v_global_607: global::Tuple([Str, Str, Str, Str]) | Type_v_global_607 == ("none", "sqlite", "postgresql", "mongodb")}
+.ask: (prompt: Str, choices: global::HomogenousTuple(Str)) -> Str
+.validate_project_name: (name: Str) -> Bool
+.build_dependencies: (project_type: Str, db: Str, extra_libs: global::List!(Str, _: Nat)) -> global::List!(Str, _: Nat)
+.scaffold_project: (name: Str, project_type: Str, target_dir: Obj) -> NoneType
+.add_dependencies: (target_dir: Obj, deps: global::List!(Str, _: Nat)) -> NoneType
+.main: () -> Int
+
+
+
+

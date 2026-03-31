@@ -1,0 +1,6 @@
+##[pylyzer] failed /mnt/Soft/Work/Projects/Python_Projects/template 2/template/infrastructure/logging/logger.py 1774374033 177
+.___v_desugar_1: Never
+.annotations: Never
+.logging: Never
+
+.get_logger: (name: Str) -> Never

@@ -1,0 +1,27 @@
+##[pylyzer] failed /mnt/Soft/Work/Projects/Python_Projects/template 2/template/app/web/main.py 1774374285 2941
+.___v_desugar_1: Never
+.annotations: Never
+.___v_desugar_2: Never
+.asdict: Never
+.json: Never
+
+.___v_desugar_3: Never
+.BaseHTTPRequestHandler: Never
+.ThreadingHTTPServer: Never
+.___v_desugar_4: Never
+.FastAPI: Never
+.FastAPI: Never
+
+.uvicorn: Never
+
+.uvicorn: Never
+
+.___v_desugar_5: Never
+.create_router: Never
+.___v_desugar_6: Never
+.get_facade: Never
+.___v_desugar_7: Never
+.Settings: Never
+._build_fastapi_app: () -> Obj
+._serve_with_stdlib: (host: Str, port: Int) -> Int
+.run: (argv: NoneType or global::List!(Str, _: Nat) := NoneType or global::List!(Str, _: Nat)) -> Int

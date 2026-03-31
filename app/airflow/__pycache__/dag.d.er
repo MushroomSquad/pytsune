@@ -1,0 +1,13 @@
+##[pylyzer] failed /mnt/Soft/Work/Projects/Python_Projects/template 2/template/app/airflow/dag.py 1774374033 880
+.___v_desugar_1: Never
+.annotations: Never
+.___v_desugar_2: Never
+.DAG: Never
+.DAG: ClassType
+
+
+.___v_desugar_3: Never
+.ItemProcessingOperator: Never
+.dag: Never
+.item_processing_task: Never
+.run: (argv: NoneType or global::List!(Str, _: Nat) := NoneType or global::List!(Str, _: Nat)) -> Int

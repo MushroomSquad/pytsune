@@ -1,0 +1,8 @@
+##[pylyzer] failed /mnt/Soft/Work/Projects/Python_Projects/template 2/template/app/lib/main.py 1774420009 430
+.___v_desugar_1: Never
+.annotations: Never
+.___v_desugar_2: Never
+.asdict: Never
+.___v_desugar_3: Never
+.LibraryAdapter: Never
+.run: (argv: NoneType or global::List!(Str, _: Nat) := NoneType or global::List!(Str, _: Nat)) -> Int

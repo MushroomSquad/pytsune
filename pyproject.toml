@@ -1,0 +1,26 @@
+[project]
+name = "pytsune"
+version = "0.1.0"
+description = "Hexagonal architecture template with CLI, web, GUI, and Airflow entry points."
+requires-python = ">=3.11"
+dependencies = [
+]
+
+[tool.uv]
+managed = true
+
+[project.scripts]
+template = "template.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

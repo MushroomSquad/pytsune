@@ -1,0 +1,26 @@
+##[pylyzer] failed /mnt/Soft/Work/Projects/Python_Projects/template 2/template/app/adapters/input/rest/controller.py 1774374285 1912
+.___v_desugar_1: Never
+.annotations: Never
+.___v_desugar_2: Never
+.asdict: Never
+.___v_desugar_3: Never
+.APIRouter: Never
+.HTTPException: Never
+.HTTPException: ClassType
+
+.APIRouter: ClassType
+
+
+.___v_desugar_4: Never
+.AppFacade: Never
+.___v_desugar_5: Never
+.ItemNotFoundError: Never
+.ItemValidationError: Never
+.RestController: ClassType
+.RestController.facade: Never
+.RestController.router: Never
+.RestController.__call__: (facade: Obj, router: Obj := Obj) -> controller.RestController
+.RestController.list_items: (self: controller.RestController) -> global::List!({Str: Obj}, _: Nat)
+.RestController.get_item: (self: controller.RestController, item_id: Str) -> global::Dict!({Str: Obj})
+.RestController.create_item: (self: controller.RestController, payload: global::Dict!({Str: Obj})) -> global::Dict!({Str: Obj})
+

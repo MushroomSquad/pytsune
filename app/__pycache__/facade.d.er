@@ -1,0 +1,15 @@
+##[pylyzer] failed /mnt/Soft/Work/Projects/Python_Projects/template 2/template/app/facade.py 1774374033 647
+.___v_desugar_1: Never
+.annotations: Never
+.___v_desugar_2: Never
+.CreateItemDTO: Never
+.ItemResponseDTO: Never
+.___v_desugar_3: Never
+.ItemInputPort: Never
+.AppFacade: ClassType
+.AppFacade._service: Never
+.AppFacade.__call__: (service: Obj) -> facade.AppFacade
+.AppFacade.create_item: (self: facade.AppFacade, name: Str, value: Float) -> Never
+.AppFacade.get_item: (self: facade.AppFacade, item_id: Str) -> Never
+.AppFacade.list_items: Never
+

@@ -1,0 +1,4 @@
+##[pylyzer] failed /mnt/Soft/Work/Projects/Python_Projects/template 2/template/infrastructure/db/db.py 1774374033 76
+.___v_desugar_1: Never
+.annotations: Never
+.init_db: () -> NoneType
