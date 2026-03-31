@@ -168,7 +168,7 @@ uv run pytest tests/unit/test_scaffold.py
 
 ```
 [project]
-name = "template"
+name = "pytsune"
 version = "0.1.0"
 description = "Hexagonal architecture template with CLI, web, GUI, and Airflow entry points."
 requires-python = ">=3.11"
@@ -179,7 +179,7 @@ dependencies = [
 managed = true
 
 [project.scripts]
-template = "template.__main__:main"
+pytsune = "scaffold:main"
 
 [dependency-groups]
 dev = [

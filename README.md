@@ -9,7 +9,7 @@
 Run through the installer:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MushroomSquad/pytsune/refs/heads/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/MushroomSquad/pytsune/main/install.sh | bash
 ```
 
 The `install.sh` script:
@@ -131,7 +131,7 @@ See [`docs/overview.md`](docs/overview.md) for the full architecture overview.
 
 ### Template Intent
 
-The package metadata still uses the name `template` in [`pyproject.toml`](pyproject.toml). That is intentional: this repository is a scaffold source, and `scaffold.py` generates a project subset from the template rather than shipping `pytsune` as a finalized application package.
+The package metadata exposes a `pytsune` console script wired to [`scaffold.py`](scaffold.py). This repository is still a scaffold source: `scaffold.py` generates a fresh project subset rather than shipping `pytsune` as a finalized application package.
 
 ### Scaffold Subsets
 

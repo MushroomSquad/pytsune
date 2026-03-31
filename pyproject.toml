@@ -10,7 +10,7 @@ dependencies = [
 managed = true
 
 [project.scripts]
-template = "template.__main__:main"
+pytsune = "scaffold:main"
 
 [dependency-groups]
 dev = [
