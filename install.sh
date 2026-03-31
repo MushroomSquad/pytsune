@@ -3,7 +3,7 @@
 set -euo pipefail
 
 MIN_UV_VERSION="0.4.0"
-RAW_BASE_URL="${BOOTSTRAP_RAW_BASE:-https://raw.githubusercontent.com/OWNER/REPO/main}"
+RAW_BASE_URL="${BOOTSTRAP_RAW_BASE:-https://raw.githubusercontent.com/MushroomSquad/pytsune/refs/heads/main}"
 SCAFFOLD_URL="${BOOTSTRAP_SCAFFOLD_URL:-${RAW_BASE_URL}/scaffold.py}"
 TMP_SCAFFOLD="$(mktemp /tmp/scaffold.XXXXXX.py)"
 
