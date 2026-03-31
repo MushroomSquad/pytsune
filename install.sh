@@ -41,4 +41,4 @@ trap cleanup EXIT
 
 ensure_uv
 curl -fsSL "${SCAFFOLD_URL}" -o "${TMP_SCAFFOLD}"
-uv run --python 3.11 "${TMP_SCAFFOLD}"
+uv run --python 3.11 "${TMP_SCAFFOLD}" < /dev/tty

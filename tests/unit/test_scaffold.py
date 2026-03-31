@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import shutil
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -7,9 +8,11 @@ from unittest.mock import Mock, patch
 import pytest
 
 from scaffold import (
+    _tty_input,
     add_dependencies,
     ask,
     build_dependencies,
+    main,
     scaffold_project,
     validate_project_name,
 )
@@ -57,8 +60,59 @@ def test_build_dependencies_lib_mongodb() -> None:
 
 
 def test_ask_valid_choice() -> None:
-    with patch("builtins.input", side_effect=["wrong", "web"]):
+    with patch("scaffold._tty_input", side_effect=["wrong", "web"]):
         assert ask("Project type", ("cli", "web")) == "web"
+
+
+def test_tty_input_uses_builtin_input_when_stdin_is_tty() -> None:
+    stdin = Mock()
+    stdin.isatty.return_value = True
+
+    with patch("scaffold.sys.stdin", stdin), patch("builtins.input", return_value="demo") as input_mock:
+        assert _tty_input("Project name: ") == "demo"
+
+    input_mock.assert_called_once_with("Project name: ")
+
+
+def test_tty_input_reads_from_dev_tty_when_stdin_is_not_tty() -> None:
+    stdin = Mock()
+    stdin.isatty.return_value = False
+    tty_stream = io.StringIO("telegram\n")
+
+    with (
+        patch("scaffold.sys.stdin", stdin),
+        patch("pathlib.Path.open", return_value=tty_stream) as open_mock,
+        patch("builtins.print") as print_mock,
+    ):
+        assert _tty_input("Project type: ") == "telegram"
+
+    open_mock.assert_called_once_with(encoding="utf-8")
+    print_mock.assert_called_once_with("Project type: ", end="", flush=True)
+
+
+def test_tty_input_raises_human_readable_eoferror_without_dev_tty() -> None:
+    stdin = Mock()
+    stdin.isatty.return_value = False
+
+    with patch("scaffold.sys.stdin", stdin), patch(
+        "pathlib.Path.open", side_effect=OSError("no tty")
+    ):
+        with pytest.raises(EOFError, match="Interactive input is unavailable"):
+            _tty_input("Database: ")
+
+
+@patch("scaffold.shutil.which", return_value="/usr/bin/uv")
+@patch("scaffold._tty_input", side_effect=EOFError("Interactive input is unavailable."))
+def test_main_returns_error_without_traceback_on_eoferror(
+    tty_input_mock: Mock, which_mock: Mock, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert main() == 1
+
+    captured = capsys.readouterr()
+    assert "Interactive input is unavailable." in captured.err
+    assert "Traceback" not in captured.err
+    which_mock.assert_called_once_with("uv")
+    tty_input_mock.assert_called_once_with("Project name: ")
 
 
 def test_validate_project_name_accepts_valid() -> None:
