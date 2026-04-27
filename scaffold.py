@@ -19,11 +19,13 @@ import textwrap
 import urllib.request
 
 
-PROJECT_TYPES = ("cli", "web", "telegram", "airflow", "lib")
+PROJECT_TYPES = ("cli", "web", "robyn", "telegram", "airflow", "lib")
 DATABASE_CHOICES = ("none", "sqlite", "postgresql", "mongodb")
+# Airflow scaffolds include the full `app/airflow/` subtree, including `app/airflow/etl/`.
 TYPE_INCLUDES = {
     "cli": ("app/cli/", "app/adapters/input/cli/"),
     "web": ("app/web/", "app/adapters/input/rest/"),
+    "robyn": ("app/robyn/", "app/adapters/input/rest/"),
     "telegram": ("app/telegram/", "app/adapters/input/telegram/"),
     "airflow": ("app/airflow/", "app/adapters/input/airflow/"),
     "lib": ("app/lib/", "app/adapters/input/lib/"),
@@ -76,6 +78,7 @@ ROOT_PACKAGE_PATHS = ("__init__.py", "__main__.py", "app/", "core/", "infrastruc
 ENTRY_MODULES = {
     "cli": "app.adapters.input.cli.cli",
     "web": "app.web.main",
+    "robyn": "app.robyn.main",
     "telegram": "app.telegram.main",
     "airflow": "app.airflow.dag",
     "lib": "app.lib.main",
@@ -114,6 +117,7 @@ def build_dependencies(project_type: str, db: str, extra_libs: list[str]) -> lis
     project_dependencies = {
         "cli": ["typer", "pydantic-settings"],
         "web": ["fastapi", "uvicorn", "pydantic-settings"],
+        "robyn": ["robyn", "pydantic-settings"],
         "telegram": ["aiogram", "pydantic-settings"],
         "airflow": ["apache-airflow>=2.3", "pydantic-settings"],
         "lib": ["pydantic-settings"],
@@ -319,7 +323,7 @@ def main() -> int:
                 """
                 Project scaffold
                 - project name: lowercase letters and underscores only
-                - project types: cli, web, telegram, airflow, lib
+                - project types: cli, web, robyn, telegram, airflow, lib
                 - databases: none, sqlite, postgresql, mongodb
                 """
             ).strip()

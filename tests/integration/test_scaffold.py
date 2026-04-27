@@ -13,6 +13,7 @@ import scaffold
 TYPE_EXPECTATIONS = {
     "cli": ("app/cli", "app/adapters/input/cli/commands"),
     "web": ("app/web", "app/adapters/input/rest"),
+    "robyn": ("app/robyn", "app/adapters/input/rest"),
     "telegram": ("app/telegram", "app/adapters/input/telegram"),
     "airflow": ("app/airflow", "app/adapters/input/airflow"),
     "lib": ("app/lib", "app/adapters/input/lib"),
@@ -50,6 +51,16 @@ def test_scaffold_main_local_template(project_type: str, tmp_path: Path) -> None
         assert (package_root / "app/adapters/input/airflow/__init__.py").exists()
         assert (package_root / "app/adapters/input/airflow/operators.py").exists()
         assert (package_root / "app/airflow/dag.py").exists()
+        for relpath in (
+            "app/airflow/etl/operators.py",
+            "app/airflow/etl/dag_etl.py",
+            "app/airflow/etl/stubs.py",
+            "core/application/ports/input/producer.py",
+            "core/application/ports/output/consumer.py",
+            "infrastructure/queue.py",
+            "core/application/use_cases/etl_use_case.py",
+        ):
+            assert (package_root / relpath).exists()
     pyproject = tomllib.loads((tmp_path / project_name / "pyproject.toml").read_text(encoding="utf-8"))
     if project_type == "cli":
         assert (package_root / "app/adapters/input/cli/args.py").exists()
@@ -58,6 +69,10 @@ def test_scaffold_main_local_template(project_type: str, tmp_path: Path) -> None
         )
     if project_type == "airflow":
         assert "apache-airflow>=2.3" in pyproject["project"]["dependencies"]
+    if project_type == "robyn":
+        assert "robyn" in pyproject["project"]["dependencies"]
+        assert (package_root / "app/adapters/input/rest/robyn_controller.py").exists()
+        assert (package_root / "app/robyn/main.py").exists()
     assert (tmp_path / project_name / "main.py").exists()
 
     commands = [call.args[0] for call in run_mock.call_args_list]
