@@ -3,11 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from template.core.application.ports.output.repository_port import ItemRepositoryPort
 from template.core.domain.entities.model import Item
 
 
-class FileItemRepository(ItemRepositoryPort):
+class FileItemRepository:
     def __init__(self, path: str | Path) -> None:
         self._path = Path(path)
 

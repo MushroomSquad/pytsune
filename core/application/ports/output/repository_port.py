@@ -1,19 +1,11 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from typing import Protocol
 
 from template.core.domain.entities.model import Item
 
 
-class ItemRepositoryPort(ABC):
-    @abstractmethod
-    def save(self, item: Item) -> Item:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get(self, item_id: str) -> Item | None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def list(self) -> list[Item]:
-        raise NotImplementedError
+class ItemRepositoryPort(Protocol):
+    def save(self, item: Item) -> Item: ...
+    def get(self, item_id: str) -> Item | None: ...
+    def list(self) -> list[Item]: ...

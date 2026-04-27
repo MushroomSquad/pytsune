@@ -4,14 +4,10 @@ import logging
 from collections.abc import AsyncIterator
 from typing import Any
 
-from template.core.application.ports.input.producer import IProducer
-from template.core.application.ports.output.consumer import IConsumer
-
-
 LOGGER = logging.getLogger(__name__)
 
 
-class StubProducer(IProducer):
+class StubProducer:
     def __init__(self, items: list[dict[str, Any]] | None = None) -> None:
         self._items = items or [
             {"id": "record-1", "payload": "alpha"},
@@ -23,7 +19,7 @@ class StubProducer(IProducer):
             yield item
 
 
-class StubConsumer(IConsumer):
+class StubConsumer:
     def __init__(self) -> None:
         self.items: list[Any] = []
 

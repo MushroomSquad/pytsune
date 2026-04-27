@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from template.core.application.ports.output.repository_port import ItemRepositoryPort
 from template.core.domain.entities.model import Item
 
 
-class InMemoryItemRepository(ItemRepositoryPort):
+class InMemoryItemRepository:
     def __init__(self) -> None:
         self._items: dict[str, Item] = {}
 

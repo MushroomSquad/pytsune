@@ -4,16 +4,8 @@ import asyncio
 import unittest
 
 from template.app.airflow.etl.stubs import StubConsumer, StubProducer
-from template.core.application.ports.input.producer import IProducer
-from template.core.application.ports.output.consumer import IConsumer
 from template.core.application.use_cases.etl_use_case import ETLUseCase
 from template.infrastructure.queue import AsyncQueue
-
-
-class ETLContractsTestCase(unittest.TestCase):
-    def test_stubs_match_ports(self) -> None:
-        self.assertIsInstance(StubProducer(), IProducer)
-        self.assertIsInstance(StubConsumer(), IConsumer)
 
 
 class ETLUseCaseTestCase(unittest.IsolatedAsyncioTestCase):

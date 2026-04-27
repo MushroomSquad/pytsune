@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from template.core.application.dtos.dto import CreateItemDTO, ItemResponseDTO
-from template.core.application.ports.input.input_port import ItemInputPort
 from template.core.application.use_cases.use_case import (
     CreateItemUseCase,
     GetItemUseCase,
@@ -9,7 +8,7 @@ from template.core.application.use_cases.use_case import (
 )
 
 
-class ApplicationService(ItemInputPort):
+class ApplicationService:
     def __init__(
         self,
         create_use_case: CreateItemUseCase,
