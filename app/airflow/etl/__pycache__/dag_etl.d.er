@@ -1,0 +1,20 @@
+##[pylyzer] failed /mnt/Soft/Work/Projects/Python_Projects/pytsune/app/airflow/etl/dag_etl.py 1774983429 1424
+.___v_desugar_1: Never
+.annotations: Never
+.___v_desugar_2: Never
+.datetime: Never
+.___v_desugar_3: Never
+.ConsumerOperator: Never
+.ProducerOperator: Never
+.___v_desugar_4: Never
+.DAG: Never
+.DAG: ClassType
+
+
+
+.producer: Never
+.consumer: Never
+
+
+
+.run: (argv: NoneType or global::List!(Str, _: Nat) := NoneType or global::List!(Str, _: Nat)) -> Int

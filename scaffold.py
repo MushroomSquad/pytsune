@@ -20,6 +20,8 @@ import urllib.request
 
 
 PROJECT_TYPES = ("cli", "web", "robyn", "telegram", "airflow", "lib")
+TOP_PROJECT_TYPES = ("cli", "web", "telegram", "airflow", "lib")
+WEB_FRAMEWORKS = ("fastapi", "robyn")
 DATABASE_CHOICES = ("none", "sqlite", "postgresql", "mongodb")
 # Airflow scaffolds include the full `app/airflow/` subtree, including `app/airflow/etl/`.
 TYPE_INCLUDES = {
@@ -101,12 +103,16 @@ def _tty_input(prompt: str) -> str:
 
 
 def ask(prompt: str, choices: tuple[str, ...]) -> str:
-    choice_list = ", ".join(choices)
+    print(f"\n{prompt}:")
+    for i, choice in enumerate(choices, 1):
+        print(f"  {i}) {choice}")
     while True:
-        answer = _tty_input(f"{prompt} [{choice_list}]: ").strip()
-        if answer in choices:
-            return answer
-        print(f"Invalid choice: {answer or '<empty>'}. Expected one of: {choice_list}.")
+        answer = _tty_input(f"Select [1-{len(choices)}]: ").strip()
+        if answer.isdigit():
+            idx = int(answer) - 1
+            if 0 <= idx < len(choices):
+                return choices[idx]
+        print(f"Invalid choice. Enter a number from 1 to {len(choices)}.")
 
 
 def validate_project_name(name: str) -> bool:
@@ -323,19 +329,23 @@ def main() -> int:
                 """
                 Project scaffold
                 - project name: lowercase letters and underscores only
-                - project types: cli, web, robyn, telegram, airflow, lib
-                - databases: none, sqlite, postgresql, mongodb
                 """
             ).strip()
         )
 
         while True:
-            name = _tty_input("Project name: ").strip()
+            name = _tty_input("\nProject name: ").strip()
             if validate_project_name(name):
                 break
             print("Invalid project name. Use only lowercase letters and underscores.")
 
-        project_type = ask("Project type", PROJECT_TYPES)
+        type_choice = ask("Project type", TOP_PROJECT_TYPES)
+        if type_choice == "web":
+            framework = ask("Web framework", WEB_FRAMEWORKS)
+            project_type = "robyn" if framework == "robyn" else "web"
+        else:
+            project_type = type_choice
+
         db = ask("Database", DATABASE_CHOICES)
         extra_libs_input = _tty_input("Extra libraries (comma-separated, optional): ").strip()
         extra_libs = [item.strip() for item in extra_libs_input.split(",") if item.strip()]

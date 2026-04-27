@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import os
 import unittest
+from asyncio import Queue
 
 from template.infrastructure.startup import bootstrap
+from template.infrastructure.container import ContainerFactory
+from template.infrastructure.queue import AsyncQueue
 
 
 class ContainerIntegrationTestCase(unittest.TestCase):
@@ -28,3 +31,12 @@ class ContainerIntegrationTestCase(unittest.TestCase):
         self.assertEqual(listed[0].name, "demo")
         self.assertEqual(produced[0]["source_id"], "demo-source")
         self.assertEqual(consumed["status"], "processed")
+
+    def test_resolve_queue_returns_singleton(self) -> None:
+        container = ContainerFactory()
+
+        first = container.resolve(Queue)
+        second = container.resolve(Queue)
+
+        self.assertIs(first, second)
+        self.assertIsInstance(first, AsyncQueue)

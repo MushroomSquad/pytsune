@@ -168,6 +168,17 @@ cd <name> && uv run main.py
 - `infrastructure/logging/logger.py` centralizes logger creation.
 - `infrastructure/db/db.py` is the placeholder DB initialization hook for generated projects.
 
+### Airflow ETL Producer-Consumer
+
+- Modify `core/application/ports/input/producer.py` and `core/application/ports/output/consumer.py` to define the producer and consumer contracts for your pipeline.
+- Put orchestration in `core/application/use_cases/etl_use_case.py`; it coordinates the async producer, consumer, and shared queue.
+- Keep the in-memory queue wrapper in `infrastructure/queue.py` and its registrations in `infrastructure/container.py`.
+- Airflow-specific files live in `app/airflow/etl/`: `operators.py`, `dag_etl.py`, and `stubs.py`.
+- Replace `StubProducer` in `app/airflow/etl/stubs.py` with your extraction logic by yielding real records from `produce()`.
+- Replace `StubConsumer` in `app/airflow/etl/stubs.py` with your load or side-effect logic inside `consume(item)`.
+- `app/airflow/dag.py` re-exports the ETL DAG so Airflow still discovers a single `dag` object from the legacy entry module.
+- The template uses a shared in-memory queue between tasks, so the ETL DAG is only safe with Airflow `LocalExecutor`. Distributed executors will not share that queue state.
+
 ## Testing
 
 Main bootstrap validation:
